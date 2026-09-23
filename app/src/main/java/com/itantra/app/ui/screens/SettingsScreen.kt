@@ -15,18 +15,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itantra.app.transport.throttle.TokenBucketLimiter
+import com.itantra.app.transport.wifi.WiFiDirectUdpTransport
 import com.itantra.app.ui.theme.AlertRed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     tokenBucketLimiter: TokenBucketLimiter,
+    transport: WiFiDirectUdpTransport,
+    connectionState: String,
+    onShowToast: (String) -> Unit,
     onClearAudioCache: () -> Unit,
     onResetAppData: () -> Unit,
     onBack: () -> Unit
 ) {
     var bitrateKbps by remember { mutableStateOf((tokenBucketLimiter.rateBps / 1000).toFloat()) }
     var vadSilenceGapMs by remember { mutableStateOf(700f) }
+    var peerIpInput by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -49,6 +54,61 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Wi-Fi Direct Peer Connection Card (Demo Helper)
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Wi-Fi Direct Peer Connection", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(
+                            "Enter peer's Wi-Fi Direct IP address to establish UDP connection",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = peerIpInput,
+                            onValueChange = { peerIpInput = it },
+                            label = { Text("Peer IP Address (e.g. 192.168.49.2)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Status: $connectionState",
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (connectionState == "CONNECTED") MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error,
+                                fontSize = 13.sp
+                            )
+                            Button(
+                                onClick = {
+                                    if (peerIpInput.isBlank()) {
+                                        onShowToast("Please enter peer IP address")
+                                        return@Button
+                                    }
+                                    try {
+                                        transport.connectPeer(peerIpInput.trim())
+                                        onShowToast("Connected to peer at $peerIpInput")
+                                    } catch (e: Exception) {
+                                        onShowToast("Connection failed: ${e.message}")
+                                    }
+                                }
+                            ) {
+                                Text("Connect Peer")
+                            }
+                        }
+                    }
+                }
+            }
+
             // Software Bitrate Throttling
             item {
                 Card(

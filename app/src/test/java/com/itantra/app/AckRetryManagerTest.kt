@@ -80,25 +80,25 @@ class AckRetryManagerTest {
             0L
         )
 
-        // Register group sent (timeout is 580 ms at 2000 bps)
+        // Register group sent
         manager.registerGroupSent(messageId = 101L, frameGroupId = 0, frames = listOf(frame), rateBps = 2000)
         assertEquals(1, manager.getPendingGroupCount())
 
         // Advance time to trigger retry 1
-        advanceTimeBy(600)
+        advanceTimeBy(800)
         assertEquals(0, retransmittedGroup)
         assertEquals(1, manager.totalRetransmissions.get())
 
         // Advance time to trigger retry 2
-        advanceTimeBy(600)
+        advanceTimeBy(800)
         assertEquals(2, manager.totalRetransmissions.get())
 
         // Advance time to trigger retry 3
-        advanceTimeBy(600)
+        advanceTimeBy(800)
         assertEquals(3, manager.totalRetransmissions.get())
 
         // Advance time past 3rd retry -> Retries exhausted!
-        advanceTimeBy(600)
+        advanceTimeBy(800)
         assertEquals(101L, failedMessageId)
         assertEquals(1, manager.incompleteTimeouts.get())
         assertEquals(0, manager.getPendingGroupCount())

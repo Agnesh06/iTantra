@@ -91,11 +91,19 @@ class WiFiDirectUdpTransport(
         throw IllegalStateException("Failed to bind UDP socket in range $DEFAULT_PORT..$MAX_PORT")
     }
 
+    fun getBoundPort(): Int = boundPort
+
     fun setPeerEndpoint(address: InetAddress, port: Int) {
         peerAddress = address
         peerPort = port
         _connectionState.value = ConnectionState.CONNECTED
         AppLogger.i("Transport", "Peer endpoint configured: $address:$port", category = LogCategory.NETWORK)
+    }
+
+    fun connectPeer(ipAddress: String, port: Int = DEFAULT_PORT) {
+        val addr = InetAddress.getByName(ipAddress)
+        setPeerEndpoint(addr, port)
+        sendHello()
     }
 
     fun sendHello() {

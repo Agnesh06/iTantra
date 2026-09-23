@@ -267,6 +267,9 @@ class MainActivity : ComponentActivity() {
                     composable(Screen.Settings.route) {
                         SettingsScreen(
                             tokenBucketLimiter = container.tokenBucketLimiter,
+                            transport = container.transport,
+                            connectionState = connectionState.name,
+                            onShowToast = { msg -> Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show() },
                             onClearAudioCache = {
                                 File(cacheDir, "audio_messages").deleteRecursively()
                                 Toast.makeText(this@MainActivity, "Audio cache cleared", Toast.LENGTH_SHORT).show()

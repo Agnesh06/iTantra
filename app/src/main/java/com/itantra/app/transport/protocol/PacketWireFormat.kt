@@ -18,8 +18,8 @@ object PacketConstants {
     const val FLAG_CONFIDENCE_PRESENT: Byte = 0x02
     const val FLAG_TRANSLATION_USED: Byte = 0x04
 
-    const val HEADER_SIZE_WITHOUT_CRC = 17
-    const val HEADER_TOTAL_SIZE = 21 // 17 + 4 CRC32
+    const val HEADER_SIZE_WITHOUT_CRC = 19
+    const val HEADER_TOTAL_SIZE = 23 // 19 + 4 CRC32
 
     const val ACK_STATUS_COMPLETE: Byte = 0
     const val ACK_STATUS_FEC_RECONSTRUCTED: Byte = 1
