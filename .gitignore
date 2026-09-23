@@ -1,0 +1,100 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+app/build/
+.gradle/
+buildOutput/
+
+# Gradle files
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+captures/
+
+# IntelliJ IDEA / Android Studio
+*.iml
+.idea/
+.idea/libraries
+.idea/modules.xml
+.idea/workspace.xml
+.idea/caches
+.idea/assetWizardSettings.xml
+.idea/navEditor.xml
+.idea/kotlinc.xml
+.idea/deploymentTargetSelector.xml
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build folder
+.cxx/
+.externalNativeBuild/
+
+# Google Services (Firebase / Cloud credentials if any)
+google-services.json
+
+# Local configuration file (sdk.dir, etc)
+local.properties
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Large AI model artifacts (download on demand via ModelManager)
+exported_models/
+*.onnx
+*.pt
+*.bin
+*.tar.gz
