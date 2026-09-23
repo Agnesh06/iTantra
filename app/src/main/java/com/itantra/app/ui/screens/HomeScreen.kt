@@ -37,6 +37,7 @@ fun HomeScreen(
     onPttPressRelease: () -> Unit,
     onHandsFreeToggle: () -> Unit,
     isHandsFreeActive: Boolean,
+    onSendCustomText: (String) -> Unit,
     onNavigateToConversation: () -> Unit,
     onNavigateToLanguagePacks: () -> Unit,
     onNavigateToDiagnostics: () -> Unit,
@@ -44,6 +45,7 @@ fun HomeScreen(
 ) {
     var sourceDropdownExpanded by remember { mutableStateOf(false) }
     var targetDropdownExpanded by remember { mutableStateOf(false) }
+    var customText by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -166,6 +168,41 @@ fun HomeScreen(
                 }
             }
 
+            // Quick Demo Text Input (Bypasses offline ASR error 13 so you can send any message instantly)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("Live Demo Quick Message (Bypass ASR)", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = customText,
+                            onValueChange = { customText = it },
+                            placeholder = { Text("Type custom message...") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        Button(
+                            onClick = {
+                                if (customText.isNotBlank()) {
+                                    onSendCustomText(customText.trim())
+                                    customText = ""
+                                }
+                            }
+                        ) {
+                            Text("Send")
+                        }
+                    }
+                }
+            }
+
             // Mode Controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -216,7 +253,7 @@ fun HomeScreen(
                     color = micColor,
                     shadowElevation = 8.dp,
                     modifier = Modifier
-                        .size(140.dp)
+                        .size(120.dp)
                         .then(
                             if (isPttMode) {
                                 Modifier.pointerInteropFilter { motionEvent ->
@@ -242,17 +279,17 @@ fun HomeScreen(
                             imageVector = if (isPttMode) Icons.Default.Mic else (if (isHandsFreeActive) Icons.Default.Stop else Icons.Default.Mic),
                             contentDescription = "Microphone",
                             tint = Color.Black,
-                            modifier = Modifier.size(64.dp)
+                            modifier = Modifier.size(54.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = if (isPttMode) "HOLD TO SPEAK • RELEASE TO SEND" else (if (isHandsFreeActive) "LISTENING (VAD ACTIVE)" else "TAP TO START HANDS-FREE"),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     color = if (isAlertMode) AlertRed else MaterialTheme.colorScheme.onBackground
                 )
             }
@@ -261,7 +298,7 @@ fun HomeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = 4.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(

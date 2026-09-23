@@ -14,6 +14,7 @@ import com.itantra.app.domain.ai.VadListener
 import com.itantra.app.data.local.entity.MessageDirection
 import com.itantra.app.data.local.entity.MessageEntity
 import com.itantra.app.data.local.entity.MessageStatus
+import com.itantra.app.di.AppContainer
 import com.itantra.app.iTantraApplication
 import com.itantra.app.platform.AppLogger
 import com.itantra.app.platform.LogCategory
@@ -141,6 +142,15 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             isHandsFreeActive = isHandsFreeActive,
+                            onSendCustomText = { customText ->
+                                processAndSendText(
+                                    container = container,
+                                    text = customText,
+                                    sourceLang = selectedSourceLang,
+                                    targetLang = selectedTargetLang,
+                                    isAlert = isAlertMode
+                                )
+                            },
                             onNavigateToConversation = { navController.navigate(Screen.Conversation.route) },
                             onNavigateToLanguagePacks = { navController.navigate(Screen.LanguagePacks.route) },
                             onNavigateToDiagnostics = { navController.navigate(Screen.Diagnostics.route) },
@@ -348,6 +358,61 @@ class MainActivity : ComponentActivity() {
                 payloadBytes = payloadBytes,
                 alertFlag = isAlert,
                 hasConfidence = confFlags.isNotEmpty(),
+                translationUsed = !translationResult.isTranslationSkipped
+            )
+        }
+    }
+
+    private fun processAndSendText(
+        container: AppContainer,
+        text: String,
+        sourceLang: String,
+        targetLang: String,
+        isAlert: Boolean
+    ) {
+        val scope = container.appScope
+        scope.launch {
+            val messageId = container.messageIdGenerator.incrementAndGet()
+
+            // 1. Translation
+            val translationResult = container.translationManager.translate(text, sourceLang, targetLang)
+            val finalText = if (translationResult.isFailed) text else translationResult.translatedText
+            val status = if (translationResult.isFailed) MessageStatus.TranslationFailed else MessageStatus.PROCESSING
+
+            // 2. Local persistence
+            val entity = MessageEntity(
+                id = messageId,
+                conversationId = "default_conv",
+                direction = MessageDirection.OUTGOING,
+                sourceLanguage = sourceLang,
+                targetLanguage = targetLang,
+                text = text,
+                translatedText = if (!translationResult.isTranslationSkipped) finalText else null,
+                alertFlag = isAlert,
+                confidenceFlagsJson = JSONArray().toString(),
+                status = status,
+                sentAt = System.currentTimeMillis()
+            )
+            container.messageDao.insertOrUpdate(entity)
+
+            // 3. Construct compact JSON payload
+            val json = JSONObject().apply {
+                put("messageId", messageId)
+                put("sourceLanguage", sourceLang)
+                put("targetLanguage", targetLang)
+                put("alertFlag", isAlert)
+                put("translationUsed", !translationResult.isTranslationSkipped && !translationResult.isFailed)
+                put("text", finalText)
+                put("confidenceFlags", JSONArray())
+            }
+            val payloadBytes = json.toString().toByteArray(Charsets.UTF_8)
+
+            // 4. Transmit over UDP via Wi-Fi Direct
+            container.transport.sendMessage(
+                messageId = messageId,
+                payloadBytes = payloadBytes,
+                alertFlag = isAlert,
+                hasConfidence = false,
                 translationUsed = !translationResult.isTranslationSkipped
             )
         }

@@ -41,9 +41,9 @@ class AppContainer(val context: Context) {
 
     // AI Layer
     val vadManager: VadManager = SileroVadManager(appScope)
-    val asrManager: AsrManager = IndicConformerAsrManager()
-    val translationManager: TranslationManager = IndicTrans2TranslationManager()
-    val ttsManager: TtsManager = LocalTtsManager()
+    val asrManager: AsrManager = IndicConformerAsrManager(context)
+    val translationManager: TranslationManager = IndicTrans2TranslationManager(context)
+    val ttsManager: TtsManager = LocalTtsManager(context)
     val modelManager = ModelManager(context, modelPackDao)
 
     // Transport Layer
